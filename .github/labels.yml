@@ -1,0 +1,84 @@
+# GitHub Labels
+# Synced by the label-sync workflow. Edit this file to add/remove/rename labels.
+# https://github.com/EndBug/label-sync
+#
+# Label-sync's delete-other-labels is set to false so manually applied labels
+# are preserved.
+
+# --- General category labels ---
+- name: feature
+  color: "0E8A16"
+  description: "New feature or enhancement"
+
+- name: enhancement
+  color: "A2EEEF"
+  description: "Improvement to an existing feature"
+
+- name: bugfix
+  color: "D73A4A"
+  description: "Bug fix"
+
+- name: bug
+  color: "D73A4A"
+  description: "Something isn't working"
+
+- name: documentation
+  color: "0075CA"
+  description: "Documentation only changes"
+
+- name: maintenance
+  color: "FEF2C0"
+  description: "Maintenance work"
+
+- name: performance
+  color: "F9D0C4"
+  description: "Performance improvement"
+
+- name: security
+  color: "B60205"
+  description: "Security fix or improvement"
+
+- name: testing
+  color: "BFD4F2"
+  description: "Test-related changes"
+
+- name: dependencies
+  color: "0366D6"
+  description: "Dependency updates"
+
+- name: breaking
+  color: "D93F0B"
+  description: "Breaking change"
+
+# --- Workflow labels ---
+- name: "good first issue"
+  color: "7057FF"
+  description: "Good for newcomers"
+
+- name: "help wanted"
+  color: "008672"
+  description: "Extra attention is needed"
+
+- name: "wontfix"
+  color: "FFFFFF"
+  description: "This will not be worked on"
+
+- name: "duplicate"
+  color: "CFD3D7"
+  description: "This issue or pull request already exists"
+
+- name: "invalid"
+  color: "E4E669"
+  description: "This doesn't seem right"
+
+- name: "stale"
+  color: "9E6A03"
+  description: "No recent activity"
+
+- name: "pinned"
+  color: "006B75"
+  description: "Exempt from stale bot"
+
+- name: "question"
+  color: "D876E3"
+  description: "Further information is requested"

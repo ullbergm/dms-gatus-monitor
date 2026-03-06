@@ -1,0 +1,45 @@
+name: Publish Release
+
+# Fires when a draft release is published via the GitHub UI.
+# Replace the stub steps below with your actual release process,
+# e.g. build artifacts, push a Docker image, publish to a registry.
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: read
+
+jobs:
+  publish:
+    name: Publish release ${{ github.event.release.tag_name }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.release.tag_name }}
+
+      # ---------------------------------------------------------------
+      # TODO: Add your release steps here. Examples:
+      #
+      # Build & push a Docker image:
+      #   - uses: docker/build-push-action@v6
+      #     with:
+      #       push: true
+      #       tags: ghcr.io/${{ github.repository }}:${{ github.event.release.tag_name }}
+      #
+      # Publish an npm package:
+      #   - run: npm publish
+      #     env:
+      #       NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      #
+      # Upload a binary as a release asset:
+      #   - run: make build
+      #   - uses: softprops/action-gh-release@v2
+      #     with:
+      #       files: dist/*
+      # ---------------------------------------------------------------
+
+      - name: Echo release tag (stub — replace this step)
+        run: echo "Released ${{ github.event.release.tag_name }}"

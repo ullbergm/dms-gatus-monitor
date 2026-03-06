@@ -1,0 +1,17 @@
+{
+    "id": "gatus-monitor",
+    "name": "Gatus Monitor",
+    "description": "Monitor Gatus service health status and display endpoint up/down state in your status bar.",
+    "version": "1.0.0",
+    "author": "Magnus Ullberg",
+    "component": "./GatusWidget.qml",
+    "icon": "monitor_heart",
+    "settings": "./GatusSettings.qml",
+    "requires_dms": ">=1.4.0",
+    "license": "MIT",
+    "permissions": [
+        "network",
+        "settings_read",
+        "settings_write"
+    ]
+}

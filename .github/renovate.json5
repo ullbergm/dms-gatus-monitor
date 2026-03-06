@@ -1,0 +1,44 @@
+{
+  $schema: "https://docs.renovatebot.com/renovate-schema.json",
+  extends: ["config:recommended"],
+  timezone: "UTC",
+  schedule: ["on monday"],
+  dependencyDashboard: true,
+  prConcurrentLimit: 5,
+  prHourlyLimit: 2,
+  pinDigests: false,
+  semanticCommits: "enabled",
+  semanticCommitType: "chore",
+  semanticCommitScope: "deps",
+  packageRules: [
+    {
+      // Group all non-major updates across all ecosystems into a single PR
+      matchUpdateTypes: ["minor", "patch"],
+      groupName: "all non-major dependencies",
+      groupSlug: "all-non-major",
+    },
+    {
+      // Group all GitHub Actions updates (including major — version bumps are common and low-risk)
+      matchManagers: ["github-actions"],
+      groupName: "GitHub Actions",
+      groupSlug: "github-actions",
+      automerge: true,
+      automergeType: "pr",
+      // Only automerge during the same window as the regular schedule
+      automergeSchedule: ["on monday"],
+    },
+    {
+      // Group all Python major updates
+      matchManagers: [
+        "pip_requirements",
+        "pip-compile",
+        "pipenv",
+        "poetry",
+        "pep621",
+      ],
+      matchUpdateTypes: ["major"],
+      groupName: "Python major updates",
+      groupSlug: "python-major",
+    },
+  ],
+}
