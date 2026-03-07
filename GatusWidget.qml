@@ -535,7 +535,7 @@ PluginComponent {
                     }
                 }
 
-                // Refresh button
+                // Refresh / Open buttons
                 Row {
                     width: parent.width
                     spacing: Theme.spacingS
@@ -559,6 +559,27 @@ PluginComponent {
                         MouseArea {
                             anchors.fill: parent
                             onClicked: root.fetchStatuses()
+                        }
+                    }
+
+                    Rectangle {
+                        width: openLabel.implicitWidth + Theme.spacingM * 2
+                        height: openLabel.implicitHeight + Theme.spacingS * 2
+                        radius: Theme.cornerRadius
+                        color: Theme.surfaceVariant
+
+                        StyledText {
+                            id: openLabel
+                            anchors.centerIn: parent
+                            text: "Open in Gatus"
+                            color: Theme.surfaceText
+                            font.pixelSize: Theme.fontSizeSmall
+                            font.bold: true
+                        }
+
+                        MouseArea {
+                            anchors.fill: parent
+                            onClicked: Qt.openUrlExternally(root.normalizedGatusUrl)
                         }
                     }
                 }
