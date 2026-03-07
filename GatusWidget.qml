@@ -21,6 +21,7 @@ PluginComponent {
 
     property bool apiError: false
     property string errorMessage: ""
+    property string lastUpdated: ""
 
     // --- Settings ---
     property string gatusUrl: pluginData.gatusUrl || "http://localhost:8080"
@@ -265,8 +266,6 @@ PluginComponent {
             overallStatus = up === 0 ? "all_down" : "some_down"
         } else if (unstable > 0) {
             overallStatus = "some_unstable"
-        } else if (up === 0) {
-            overallStatus = "all_down"
         } else {
             overallStatus = "all_up"
         }
@@ -383,6 +382,8 @@ PluginComponent {
         errorMessage = ""
         consecutiveFailures = 0
         currentInterval = baseInterval
+        var now = new Date()
+        lastUpdated = now.toLocaleTimeString(Qt.locale(), "HH:mm:ss")
     }
 
     function setApiFailure(reason) {
@@ -560,6 +561,14 @@ PluginComponent {
                             onClicked: root.fetchStatuses()
                         }
                     }
+                }
+
+                // Last updated timestamp
+                StyledText {
+                    visible: root.lastUpdated !== "" && root.validGatusUrl
+                    text: "Updated " + root.lastUpdated
+                    color: Theme.surfaceVariantText
+                    font.pixelSize: Theme.fontSizeSmall
                 }
 
                 // Endpoint list grouped by status
