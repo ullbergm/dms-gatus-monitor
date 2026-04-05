@@ -29,6 +29,13 @@ PluginComponent {
     property string pillModeSetting: pluginData.pillMode || "full"
     property bool unstableOkIfLatestSuccess: pluginData.unstableOkIfLatestSuccess || false
 
+    // --- Colors ---
+    readonly property color colorDown: "#ff3b30"
+    readonly property color colorDownBorder: "#ff8a82"
+    readonly property color colorUnstable: "#f0a530"
+    readonly property color colorUnstableBorder: "#f8c97a"
+    readonly property color colorAlertText: "#ffffff"
+
     // --- Polling and URL state ---
     readonly property int baseInterval: parseRefreshIntervalMs(refreshIntervalSetting)
     property int currentInterval: baseInterval
@@ -416,18 +423,18 @@ PluginComponent {
     }
 
     function statusColor() {
-        if (isDownOverallStatus()) return "#ff3b30"
+        if (isDownOverallStatus()) return colorDown
         switch (overallStatus) {
             case "all_up":        return Theme.primary
-            case "some_unstable": return "#f0a530"
+            case "some_unstable": return colorUnstable
             case "idle":          return Theme.surfaceVariantText
             default:              return Theme.error
         }
     }
 
     function pillBorderColor() {
-        if (isDownOverallStatus()) return "#ff8a82"
-        if (overallStatus === "some_unstable") return "#f8c97a"
+        if (isDownOverallStatus()) return colorDownBorder
+        if (overallStatus === "some_unstable") return colorUnstableBorder
         return "transparent"
     }
 
@@ -486,7 +493,7 @@ PluginComponent {
 
                 DankIcon {
                     name: root.statusIcon()
-                    color: root.isAlertStatus() ? "#ffffff" : root.statusColor()
+                    color: root.isAlertStatus() ? root.colorAlertText : root.statusColor()
                     anchors.verticalCenter: parent.verticalCenter
                     visible: root.normalizedPillMode !== "text"
                 }
@@ -495,7 +502,7 @@ PluginComponent {
                     text: root.statusLabel()
                     font.pixelSize: Theme.fontSizeSmall
                     font.bold: root.isAlertStatus()
-                    color: root.isAlertStatus() ? "#ffffff" : root.statusColor()
+                    color: root.isAlertStatus() ? root.colorAlertText : root.statusColor()
                     anchors.verticalCenter: parent.verticalCenter
                     visible: root.normalizedPillMode !== "icon"
                 }
@@ -607,7 +614,7 @@ PluginComponent {
 
                     SectionBlock {
                         epList: root.unstableEndpointsList
-                        sectionColor: "#f0a530"
+                        sectionColor: root.colorUnstable
                         itemIcon: "warning"
                         sectionLabel: "Unstable"
                     }
