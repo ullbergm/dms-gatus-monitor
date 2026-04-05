@@ -214,52 +214,37 @@ PluginComponent {
             return
         }
 
-        var parsed = []
-        var up = 0
-        var unstable = 0
-        var down = 0
+        var all = []
+        var downList = []
+        var unstableList = []
+        var upList = []
 
         for (var i = 0; i < arr.length; i++) {
             var ep = arr[i]
             var results = ep.results || []
             var latestResult = results.length > 0 ? results[results.length - 1] : null
             var state = endpointState(ep, latestResult, results)
-            var latestDurationMs = endpointDurationMs(ep, latestResult)
 
             var row = {
                 name: ep.name || ep.key || "Unknown",
                 group: ep.group || "",
                 key: ep.key || "",
                 state: state,
-                durationMs: latestDurationMs
+                durationMs: endpointDurationMs(ep, latestResult)
             }
-            parsed.push(row)
+            all.push(row)
 
-            if (state === "down") {
-                down++
-            } else if (state === "unstable") {
-                up++
-                unstable++
-            } else {
-                up++
-            }
+            if (state === "down") downList.push(row)
+            else if (state === "unstable") unstableList.push(row)
+            else upList.push(row)
         }
 
-        var downList = []
-        var unstableList = []
-        var upList = []
-        for (var j = 0; j < parsed.length; j++) {
-            if (parsed[j].state === "down") downList.push(parsed[j])
-            else if (parsed[j].state === "unstable") unstableList.push(parsed[j])
-            else upList.push(parsed[j])
-        }
-
-        endpoints = parsed
+        endpoints = all
         downEndpoints = downList
         unstableEndpoints = unstableList
         upEndpoints = upList
 
-        if (parsed.length === 0) {
+        if (all.length === 0) {
             overallStatus = "idle"
         } else if (downList.length > 0) {
             overallStatus = upList.length === 0 && unstableList.length === 0 ? "all_down" : "some_down"
@@ -343,7 +328,7 @@ PluginComponent {
 
 
     // ---------------------------------------------------------------
-    // Helpers
+    // Input normalization
     // ---------------------------------------------------------------
     function normalizeUrl(input) {
         var s = (input || "").trim()
@@ -376,6 +361,9 @@ PluginComponent {
         return "full"
     }
 
+    // ---------------------------------------------------------------
+    // API state management
+    // ---------------------------------------------------------------
     function setApiSuccess() {
         apiError = false
         errorMessage = ""
@@ -406,6 +394,9 @@ PluginComponent {
         return "Request failed"
     }
 
+    // ---------------------------------------------------------------
+    // Status display helpers
+    // ---------------------------------------------------------------
     function isDownOverallStatus() {
         return overallStatus === "some_down" || overallStatus === "all_down"
     }
