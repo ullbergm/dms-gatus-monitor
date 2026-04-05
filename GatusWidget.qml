@@ -13,7 +13,7 @@ PluginComponent {
     property var downEndpoints: []
     property var unstableEndpoints: []
     property var upEndpoints: []
-    property string overallStatus: "offline"  // "all_up", "some_unstable", "some_down", "all_down", "idle", "offline"
+    property string overallStatus: statusOffline
 
     property bool apiError: false
     property string errorMessage: ""
@@ -24,6 +24,14 @@ PluginComponent {
     property var refreshIntervalSetting: pluginData.refreshIntervalSec
     property string pillModeSetting: pluginData.pillMode || "full"
     property bool unstableOkIfLatestSuccess: pluginData.unstableOkIfLatestSuccess || false
+
+    // --- Status Constants ---
+    readonly property string statusAllUp: "all_up"
+    readonly property string statusSomeUnstable: "some_unstable"
+    readonly property string statusSomeDown: "some_down"
+    readonly property string statusAllDown: "all_down"
+    readonly property string statusIdle: "idle"
+    readonly property string statusOffline: "offline"
 
     // --- Colors ---
     readonly property color colorDown: "#ff3b30"
@@ -37,6 +45,7 @@ PluginComponent {
     property int currentInterval: baseInterval
     property int consecutiveFailures: 0
     readonly property int maxBackoffInterval: 60000
+    readonly property int requestTimeout: 5000
     property bool requestInFlight: false
     readonly property string normalizedGatusUrl: normalizeUrl(gatusUrl)
     readonly property bool validGatusUrl: isValidUrl(normalizedGatusUrl)
@@ -168,7 +177,7 @@ PluginComponent {
         var xhr = new XMLHttpRequest()
         var url = normalizedGatusUrl + "/api/v1/endpoints/statuses?_ts=" + Date.now()
 
-        xhr.timeout = 5000
+        xhr.timeout = requestTimeout
         xhr.onreadystatechange = function() {
             if (xhr.readyState !== XMLHttpRequest.DONE)
                 return
@@ -245,13 +254,13 @@ PluginComponent {
         upEndpoints = upList
 
         if (all.length === 0) {
-            overallStatus = "idle"
+            overallStatus = statusIdle
         } else if (downList.length > 0) {
-            overallStatus = upList.length === 0 && unstableList.length === 0 ? "all_down" : "some_down"
+            overallStatus = upList.length === 0 && unstableList.length === 0 ? statusAllDown : statusSomeDown
         } else if (unstableList.length > 0) {
-            overallStatus = "some_unstable"
+            overallStatus = statusSomeUnstable
         } else {
-            overallStatus = "all_up"
+            overallStatus = statusAllUp
         }
     }
 
@@ -260,10 +269,10 @@ PluginComponent {
         if (typeof endpoint.success === "boolean")
             return endpoint.success
 
-        var status = (endpoint.status || endpoint.health || "").toString().toLowerCase()
-        if (status === "up" || status === "healthy" || status === "ok" || status === "passing")
+        var status = lowerStr(endpoint.status || endpoint.health)
+        if (["up", "healthy", "ok", "passing"].indexOf(status) >= 0)
             return true
-        if (status === "down" || status === "critical" || status === "failing" || status === "failed" || status === "error")
+        if (["down", "critical", "failing", "failed", "error"].indexOf(status) >= 0)
             return false
 
         // Fall back to latest result when endpoint-level fields are absent.
@@ -287,8 +296,8 @@ PluginComponent {
     }
 
     function isEndpointExplicitlyUnstable(endpoint) {
-        var health = (endpoint.health || "").toString().toLowerCase()
-        var status = (endpoint.status || "").toString().toLowerCase()
+        var health = lowerStr(endpoint.health)
+        var status = lowerStr(endpoint.status)
         return health === "unhealthy" || status === "unhealthy" || status === "degraded"
     }
 
@@ -330,6 +339,10 @@ PluginComponent {
     // ---------------------------------------------------------------
     // Input normalization
     // ---------------------------------------------------------------
+    function lowerStr(val) {
+        return (val || "").toString().toLowerCase()
+    }
+
     function normalizeUrl(input) {
         var s = (input || "").trim()
         if (s === "") return ""
@@ -375,7 +388,7 @@ PluginComponent {
 
     function setApiFailure(reason) {
         apiError = true
-        overallStatus = "offline"
+        overallStatus = statusOffline
         errorMessage = errorMessageFor(reason)
         consecutiveFailures += 1
         var next = baseInterval * Math.pow(2, consecutiveFailures)
@@ -398,45 +411,45 @@ PluginComponent {
     // Status display helpers
     // ---------------------------------------------------------------
     function isDownOverallStatus() {
-        return overallStatus === "some_down" || overallStatus === "all_down"
+        return overallStatus === statusSomeDown || overallStatus === statusAllDown
     }
 
     function isAlertStatus() {
-        return isDownOverallStatus() || overallStatus === "some_unstable"
+        return isDownOverallStatus() || overallStatus === statusSomeUnstable
     }
 
     function statusColor() {
         if (isDownOverallStatus()) return colorDown
         switch (overallStatus) {
-            case "all_up":        return Theme.primary
-            case "some_unstable": return colorUnstable
-            case "idle":          return Theme.surfaceVariantText
-            default:              return Theme.error
+            case statusAllUp:        return Theme.primary
+            case statusSomeUnstable: return colorUnstable
+            case statusIdle:         return Theme.surfaceVariantText
+            default:                 return Theme.error
         }
     }
 
     function pillBorderColor() {
         if (isDownOverallStatus()) return colorDownBorder
-        if (overallStatus === "some_unstable") return colorUnstableBorder
+        if (overallStatus === statusSomeUnstable) return colorUnstableBorder
         return "transparent"
     }
 
     function statusIcon() {
         if (isDownOverallStatus()) return "error"
         switch (overallStatus) {
-            case "all_up":        return "check_circle"
-            case "some_unstable": return "warning"
-            case "idle":          return "monitor_heart"
-            default:              return "cloud_off"
+            case statusAllUp:        return "check_circle"
+            case statusSomeUnstable: return "warning"
+            case statusIdle:         return "monitor_heart"
+            default:                 return "cloud_off"
         }
     }
 
     function statusLabel() {
         if (!validGatusUrl) return "Invalid URL"
         if (apiError) return "Offline"
-        if (overallStatus === "idle") return "0"
-        if (overallStatus === "all_up") return String(upEndpoints.length)
-        if (overallStatus === "some_unstable") return String(unstableEndpoints.length)
+        if (overallStatus === statusIdle) return "0"
+        if (overallStatus === statusAllUp) return String(upEndpoints.length)
+        if (overallStatus === statusSomeUnstable) return String(unstableEndpoints.length)
         if (isDownOverallStatus()) return String(downEndpoints.length)
         return "Offline"
     }
@@ -444,9 +457,9 @@ PluginComponent {
     function statusSummaryLabel() {
         if (!validGatusUrl) return "Invalid URL"
         if (apiError) return "Offline"
-        if (overallStatus === "idle") return "No endpoints"
-        if (overallStatus === "all_up") return upEndpoints.length + " up"
-        if (overallStatus === "some_unstable") return unstableEndpoints.length + " unstable"
+        if (overallStatus === statusIdle) return "No endpoints"
+        if (overallStatus === statusAllUp) return upEndpoints.length + " up"
+        if (overallStatus === statusSomeUnstable) return unstableEndpoints.length + " unstable"
         if (isDownOverallStatus()) return downEndpoints.length + " down"
         return "Offline"
     }
