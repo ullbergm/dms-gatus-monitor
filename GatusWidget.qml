@@ -150,6 +150,33 @@ PluginComponent {
     }
 
     // ---------------------------------------------------------------
+    // Reusable button used in the popout
+    // ---------------------------------------------------------------
+    component ActionButton: Rectangle {
+        property string label: ""
+        signal clicked()
+
+        width: btnText.implicitWidth + Theme.spacingM * 2
+        height: btnText.implicitHeight + Theme.spacingS * 2
+        radius: Theme.cornerRadius
+        color: Theme.surfaceVariant
+
+        StyledText {
+            id: btnText
+            anchors.centerIn: parent
+            text: parent.label
+            color: Theme.surfaceText
+            font.pixelSize: Theme.fontSizeSmall
+            font.bold: true
+        }
+
+        MouseArea {
+            anchors.fill: parent
+            onClicked: parent.clicked()
+        }
+    }
+
+    // ---------------------------------------------------------------
     // Periodic refresh
     // ---------------------------------------------------------------
     Timer {
@@ -538,46 +565,14 @@ PluginComponent {
                     spacing: Theme.spacingS
                     visible: root.validGatusUrl
 
-                    Rectangle {
-                        width: btnLabel.implicitWidth + Theme.spacingM * 2
-                        height: btnLabel.implicitHeight + Theme.spacingS * 2
-                        radius: Theme.cornerRadius
-                        color: Theme.surfaceVariant
-
-                        StyledText {
-                            id: btnLabel
-                            anchors.centerIn: parent
-                            text: "Refresh"
-                            color: Theme.surfaceText
-                            font.pixelSize: Theme.fontSizeSmall
-                            font.bold: true
-                        }
-
-                        MouseArea {
-                            anchors.fill: parent
-                            onClicked: root.fetchStatuses()
-                        }
+                    ActionButton {
+                        label: "Refresh"
+                        onClicked: root.fetchStatuses()
                     }
 
-                    Rectangle {
-                        width: openLabel.implicitWidth + Theme.spacingM * 2
-                        height: openLabel.implicitHeight + Theme.spacingS * 2
-                        radius: Theme.cornerRadius
-                        color: Theme.surfaceVariant
-
-                        StyledText {
-                            id: openLabel
-                            anchors.centerIn: parent
-                            text: "Open in Gatus"
-                            color: Theme.surfaceText
-                            font.pixelSize: Theme.fontSizeSmall
-                            font.bold: true
-                        }
-
-                        MouseArea {
-                            anchors.fill: parent
-                            onClicked: Qt.openUrlExternally(root.normalizedGatusUrl)
-                        }
+                    ActionButton {
+                        label: "Open in Gatus"
+                        onClicked: Qt.openUrlExternally(root.normalizedGatusUrl)
                     }
                 }
 
