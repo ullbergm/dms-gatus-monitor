@@ -10,13 +10,9 @@ PluginComponent {
 
     // --- State ---
     property var endpoints: []
-    property var downEndpointsList: []
-    property var unstableEndpointsList: []
-    property var upEndpointsList: []
-    property int totalEndpoints: 0
-    property int upEndpoints: 0
-    property int unstableEndpoints: 0
-    property int downEndpoints: 0
+    property var downEndpoints: []
+    property var unstableEndpoints: []
+    property var upEndpoints: []
     property string overallStatus: "offline"  // "all_up", "some_unstable", "some_down", "all_down", "idle", "offline"
 
     property bool apiError: false
@@ -259,19 +255,15 @@ PluginComponent {
         }
 
         endpoints = parsed
-        downEndpointsList = downList
-        unstableEndpointsList = unstableList
-        upEndpointsList = upList
-        totalEndpoints = parsed.length
-        upEndpoints = up
-        unstableEndpoints = unstable
-        downEndpoints = down
+        downEndpoints = downList
+        unstableEndpoints = unstableList
+        upEndpoints = upList
 
         if (parsed.length === 0) {
             overallStatus = "idle"
-        } else if (down > 0) {
-            overallStatus = up === 0 ? "all_down" : "some_down"
-        } else if (unstable > 0) {
+        } else if (downList.length > 0) {
+            overallStatus = upList.length === 0 && unstableList.length === 0 ? "all_down" : "some_down"
+        } else if (unstableList.length > 0) {
             overallStatus = "some_unstable"
         } else {
             overallStatus = "all_up"
@@ -452,9 +444,9 @@ PluginComponent {
         if (!validGatusUrl) return "Invalid URL"
         if (apiError) return "Offline"
         if (overallStatus === "idle") return "0"
-        if (overallStatus === "all_up") return "" + upEndpoints
-        if (overallStatus === "some_unstable") return "" + unstableEndpoints
-        if (isDownOverallStatus()) return "" + downEndpoints
+        if (overallStatus === "all_up") return String(upEndpoints.length)
+        if (overallStatus === "some_unstable") return String(unstableEndpoints.length)
+        if (isDownOverallStatus()) return String(downEndpoints.length)
         return "Offline"
     }
 
@@ -462,9 +454,9 @@ PluginComponent {
         if (!validGatusUrl) return "Invalid URL"
         if (apiError) return "Offline"
         if (overallStatus === "idle") return "No endpoints"
-        if (overallStatus === "all_up") return upEndpoints + " up"
-        if (overallStatus === "some_unstable") return unstableEndpoints + " unstable"
-        if (isDownOverallStatus()) return downEndpoints + " down"
+        if (overallStatus === "all_up") return upEndpoints.length + " up"
+        if (overallStatus === "some_unstable") return unstableEndpoints.length + " unstable"
+        if (isDownOverallStatus()) return downEndpoints.length + " down"
         return "Offline"
     }
 
@@ -603,24 +595,24 @@ PluginComponent {
                 Column {
                     width: parent.width
                     spacing: Theme.spacingS
-                    visible: !root.apiError && root.totalEndpoints > 0
+                    visible: !root.apiError && root.endpoints.length > 0
 
                     SectionBlock {
-                        epList: root.downEndpointsList
+                        epList: root.downEndpoints
                         sectionColor: Theme.error
                         itemIcon: "cancel"
                         sectionLabel: "Down"
                     }
 
                     SectionBlock {
-                        epList: root.unstableEndpointsList
+                        epList: root.unstableEndpoints
                         sectionColor: root.colorUnstable
                         itemIcon: "warning"
                         sectionLabel: "Unstable"
                     }
 
                     SectionBlock {
-                        epList: root.upEndpointsList
+                        epList: root.upEndpoints
                         expanded: false
                         sectionColor: Theme.primary
                         itemIcon: "check_circle"
