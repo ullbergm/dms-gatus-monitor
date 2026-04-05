@@ -396,20 +396,36 @@ PluginComponent {
         pollTimer.restart()
     }
 
+    readonly property var errorMessages: ({
+        "invalid_url":     "Invalid Gatus URL",
+        "auth":            "Authentication failed",
+        "not_found":       "Gatus API endpoint not found",
+        "timeout":         "Request timed out",
+        "unreachable":     "Unable to reach Gatus",
+        "invalid_json":    "Invalid response from Gatus",
+        "invalid_payload": "Unexpected response payload"
+    })
+
     function errorMessageFor(reason) {
-        if (reason === "invalid_url") return "Invalid Gatus URL"
-        if (reason === "auth") return "Authentication failed"
-        if (reason === "not_found") return "Gatus API endpoint not found"
-        if (reason === "timeout") return "Request timed out"
-        if (reason === "unreachable") return "Unable to reach Gatus"
-        if (reason === "invalid_json") return "Invalid response from Gatus"
-        if (reason === "invalid_payload") return "Unexpected response payload"
-        return "Request failed"
+        return errorMessages[reason] || "Request failed"
     }
 
     // ---------------------------------------------------------------
     // Status display helpers
     // ---------------------------------------------------------------
+
+    // Centralized display config per status — avoids parallel switch/if-chains.
+    function statusDisplay() {
+        var cfg = {
+            all_up:          { color: Theme.primary,            border: "transparent",      icon: "check_circle"  },
+            some_unstable:   { color: colorUnstable,            border: colorUnstableBorder, icon: "warning"       },
+            some_down:       { color: colorDown,                border: colorDownBorder,     icon: "error"         },
+            all_down:        { color: colorDown,                border: colorDownBorder,     icon: "error"         },
+            idle:            { color: Theme.surfaceVariantText, border: "transparent",      icon: "monitor_heart" }
+        }
+        return cfg[overallStatus] || { color: Theme.error, border: "transparent", icon: "cloud_off" }
+    }
+
     function isDownOverallStatus() {
         return overallStatus === statusSomeDown || overallStatus === statusAllDown
     }
@@ -418,31 +434,9 @@ PluginComponent {
         return isDownOverallStatus() || overallStatus === statusSomeUnstable
     }
 
-    function statusColor() {
-        if (isDownOverallStatus()) return colorDown
-        switch (overallStatus) {
-            case statusAllUp:        return Theme.primary
-            case statusSomeUnstable: return colorUnstable
-            case statusIdle:         return Theme.surfaceVariantText
-            default:                 return Theme.error
-        }
-    }
-
-    function pillBorderColor() {
-        if (isDownOverallStatus()) return colorDownBorder
-        if (overallStatus === statusSomeUnstable) return colorUnstableBorder
-        return "transparent"
-    }
-
-    function statusIcon() {
-        if (isDownOverallStatus()) return "error"
-        switch (overallStatus) {
-            case statusAllUp:        return "check_circle"
-            case statusSomeUnstable: return "warning"
-            case statusIdle:         return "monitor_heart"
-            default:                 return "cloud_off"
-        }
-    }
+    function statusColor()      { return statusDisplay().color  }
+    function pillBorderColor()  { return statusDisplay().border }
+    function statusIcon()       { return statusDisplay().icon   }
 
     function statusLabel() {
         if (!validGatusUrl) return "Invalid URL"
