@@ -15,7 +15,7 @@ jobs:
     name: Check for stale issues and PRs
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/stale@v10
+      - uses: actions/stale@v11
         with:
           # --- Issues ---
           stale-issue-message: >
